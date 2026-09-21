@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% block title %}Manage Complaint - Smart Complaint System{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{{ url_for('admin.complaints_list') }}"
+           class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-arrow-left"></i>
+            Back to Complaint List
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ================= LEFT SIDE ================= -->
+
+        <div class="col-lg-8">
+
+            <!-- Complaint Summary -->
+
+            <div class="card shadow border-0 mb-4">
+
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <h4 class="fw-bold mb-1">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                            Complaint #{{ complaint.id }}
+                        </h4>
+
+                        <small>
+                            Submitted on
+                            {{ complaint.created_at.strftime('%d %B %Y, %I:%M %p') }}
+                        </small>
+
+                    </div>
+
+                    <span class="badge status-{{ complaint.status.replace(' ', '-') }} fs-6 px-3 py-2">
+
+                        {{ complaint.status }}
+
+                    </span>
+
+                </div>
+
+                <div class="card-body">
+
+                    <h2 class="fw-bold text-primary mb-4">
+
+                        {{ complaint.title }}
+
+                    </h2>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded-4 p-4 h-100">
+
+                                <h6 class="text-muted">
+
+                                    <i class="bi bi-person-fill"></i>
+
+                                    Submitted By
+
+                                </h6>
+
+                                <h5 class="fw-bold">
+
+                                    {{ complaint.author.username }}
+
+                                </h5>
+
+                                <small>
+
+                                    {{ complaint.author.email }}
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded-4 p-4 h-100">
+
+                                <h6 class="text-muted">
+
+                                    <i class="bi bi-tag-fill"></i>
+
+                                    Category
+
+                                </h6>
+
+                                <h5 class="fw-bold">
+
+                                    {{ complaint.category }}
+
+                                </h5>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- AI Analysis -->
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-light">
+
+                    <h5 class="fw-bold mb-0">
+
+                        🤖 AI Complaint Analysis
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-4 text-center">
+
+                            <h6 class="text-muted">
+
+                                Priority
+
+                            </h6>
+
+                            <span class="badge badge-{{ complaint.priority }} fs-5 px-4 py-3">
+
+                                {{ complaint.priority }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-8">
+
+                            <h6 class="fw-bold">
+
+                                AI Explanation
+
+                            </h6>
+
+                            <div class="alert alert-info mb-0">
+
+                                {{ complaint.priority_reason }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Description -->
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-light">
+
+                    <h5 class="fw-bold mb-0">
+
+                        📝 Complaint Description
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="p-4 bg-light rounded-4">
+
+                        {{ complaint.description }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Location Details -->
+            {% if complaint.address or complaint.latitude %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="fw-bold mb-0">
+                        📍 Location Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="p-4 bg-light rounded-4">
+                        {% if complaint.address %}
+                        <p class="mb-2"><strong>Address:</strong> {{ complaint.address }}</p>
+                        {% endif %}
+                        {% if complaint.landmark %}
+                        <p class="mb-3"><strong>Landmark:</strong> {{ complaint.landmark }}</p>
+                        {% endif %}
+                        
+                        {% if complaint.latitude and complaint.longitude %}
+                        <a href="https://maps.google.com/?q={{ complaint.latitude }},{{ complaint.longitude }}" 
+                           target="_blank" 
+                           class="btn btn-primary rounded-pill px-4 shadow-sm">
+                           <i class="bi bi-geo-alt-fill"></i> View on Google Maps
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Image -->
+
+            {% if complaint.image_path %}
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-light">
+
+                    <h5 class="fw-bold mb-0">
+
+                        📷 Uploaded Evidence
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body text-center">
+
+                    <img src="{{ url_for('static', filename=complaint.image_path) }}"
+                         class="img-fluid rounded-4 shadow"
+                         style="max-height:450px;">
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+
+            <!-- Feedback -->
+
+            {% if complaint.feedback %}
+
+            <div class="card shadow-sm border-success mb-4">
+
+                <div class="card-header bg-success text-white">
+
+                    <h5 class="mb-0">
+
+                        ⭐ Citizen Feedback
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <h5>
+
+                        Rating :
+
+                        {{ complaint.feedback.rating }}/5
+
+                    </h5>
+
+                    <p class="mb-0">
+
+                        "{{ complaint.feedback.comments }}"
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- ================= RIGHT SIDE ================= -->
+
+        <div class="col-lg-4">
+                        <!-- ================= UPDATE STATUS ================= -->
+
+            <div class="card shadow border-0 mb-4">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i>
+                        Update Complaint
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form method="POST" action="" enctype="multipart/form-data">
+
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+
+                            {{ form.department_id.label(class="form-label fw-bold") }}
+
+                            {{ form.department_id(class="form-select") }}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            {{ form.status.label(class="form-label fw-bold") }}
+
+                            {{ form.status(class="form-select") }}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-bold" id="remarks-label">Remarks / Action Taken</label>
+
+                            {{ form.remarks(class="form-control", rows="4", placeholder="Enter remarks...") }}
+
+                        </div>
+
+                        <div class="mb-3" id="resolution-photo-container" style="display: none;">
+                            
+                            {{ form.resolution_image.label(class="form-label fw-bold") }}
+                            
+                            {{ form.resolution_image(class="form-control") }}
+                            
+                        </div>
+
+                        <div class="d-grid">
+
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= COMPLAINT INFORMATION ================= -->
+
+            <div class="card shadow border-0 mb-4">
+
+                <div class="card-header bg-light">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-info-circle-fill text-primary"></i>
+
+                        Complaint Information
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Complaint ID
+                        </span>
+
+                        <strong>
+                            #{{ complaint.id }}
+                        </strong>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Priority
+                        </span>
+
+                        <span class="badge badge-{{ complaint.priority }}">
+                            {{ complaint.priority }}
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Status
+                        </span>
+
+                        <span class="badge status-{{ complaint.status.replace(' ', '-') }}">
+                            {{ complaint.status }}
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span class="text-muted">
+                            Department
+                        </span>
+
+                        <strong>
+
+                            {% if complaint.department %}
+                                {{ complaint.department.name }}
+                            {% else %}
+                                Not Assigned
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= TIMELINE ================= -->
+
+            <div class="card shadow border-0">
+
+                <div class="card-header bg-light">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-clock-history text-success"></i>
+
+                        Action Timeline
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for h in history %}
+
+                    <div class="d-flex mb-4">
+
+                        <div class="me-3">
+
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                 style="width:45px;height:45px;">
+
+                                <i class="bi bi-check-lg"></i>
+
+                            </div>
+
+                        </div>
+
+                        <div class="flex-grow-1">
+
+                            <div class="fw-bold">
+
+                                {% if h.old_status %}
+                                    {{ h.old_status }}
+                                    <i class="bi bi-arrow-right"></i>
+                                {% endif %}
+
+                                {{ h.new_status }}
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                {{ h.changed_at.strftime('%d %B %Y, %I:%M %p') }}
+
+                            </small>
+
+                            {% if h.remarks %}
+
+                            <div class="mt-2">
+
+                                {{ h.remarks }}
+
+                            </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="text-center py-4">
+
+                        <i class="bi bi-clock-history display-4 text-muted"></i>
+
+                        <p class="text-muted mt-3">
+
+                            No history available.
+
+                        </p>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('status');
+        const photoContainer = document.getElementById('resolution-photo-container');
+        const remarksLabel = document.getElementById('remarks-label');
+
+        function toggleFields() {
+            if (statusSelect.value === 'Resolved') {
+                photoContainer.style.display = 'block';
+                if (remarksLabel) remarksLabel.innerText = 'Resolution Remarks';
+            } else {
+                photoContainer.style.display = 'none';
+                if (remarksLabel) remarksLabel.innerText = 'Remarks / Action Taken';
+            }
+        }
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', toggleFields);
+            toggleFields();
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}Citizen Dashboard - Smart Complaint System{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="dashboard-header mb-5">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+
+            <div>
+
+                <span class="badge bg-primary rounded-pill px-4 py-2">
+                    <i class="bi bi-person-circle"></i>
+                    <span data-i18n="Citizen Portal">Citizen Portal</span>
+                </span>
+
+                <h1 class="fw-bold mt-3" data-i18n="Welcome Back 👋">
+                    Welcome Back 👋
+                </h1>
+
+                <p class="text-muted fs-5" data-i18n="Track your complaints and monitor resolution progress.">
+                    Track your complaints and monitor resolution progress.
+                </p>
+
+            </div>
+
+            <a href="{{ url_for('citizen.submit_complaint') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+
+                <i class="bi bi-plus-circle"></i>
+                <span data-i18n="Submit Complaint">New Complaint</span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ================= STAT CARDS ================= -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-3">
+            <div class="citizen-stat-card total-card">
+                <div>
+                    <p data-i18n="Total Complaints">Total Complaints</p>
+                    <h2>{{ stats.total }}</h2>
+                </div>
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="citizen-stat-card open-card">
+                <div>
+                    <p data-i18n="Open">Open</p>
+                    <h2>{{ stats.open }}</h2>
+                </div>
+                <i class="bi bi-exclamation-circle"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="citizen-stat-card progress-card">
+                <div>
+                    <p data-i18n="In Progress">In Progress</p>
+                    <h2>{{ stats.in_progress }}</h2>
+                </div>
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="citizen-stat-card resolved-card">
+                <div>
+                    <p data-i18n="Resolved">Resolved</p>
+                    <h2>{{ stats.resolved }}</h2>
+                </div>
+                <i class="bi bi-check-circle"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ================= COMPLAINT TABLE ================= -->
+
+        <div class="col-lg-8">
+
+            <div class="card dashboard-table-card">
+
+                <div class="card-header">
+
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-list-check"></i>
+                        <span data-i18n="Recent Complaints">Recent Complaints</span>
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0 dashboard-table">
+
+                            <thead class="table-light border-bottom">
+
+                                <tr>
+                                    <th data-i18n="Title">Title</th>
+                                    <th data-i18n="Priority">Priority</th>
+                                    <th data-i18n="Status">Status</th>
+                                    <th data-i18n="Date">Date</th>
+                                    <th width="200" data-i18n="Action">Action</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {% for c in complaints %}
+
+                                <tr>
+
+                                    <td class="fw-semibold">
+                                        {{ c.title }}
+                                    </td>
+
+                                    <td>
+                                        <span class="badge badge-{{ c.priority }} rounded-pill px-3 py-2 shadow-sm">
+                                            {{ c.priority }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge status-{{ c.status.replace(' ', '-') }} rounded-pill px-3 py-2 shadow-sm"
+                                            data-i18n="{{ c.status }}">
+                                            {{ c.status }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {{ c.created_at.strftime('%Y-%m-%d') }}
+                                    </td>
+
+                                    <td>
+
+                                        <a href="{{ url_for('citizen.track_complaint', complaint_id=c.id) }}"
+                                            class="btn btn-sm btn-outline-primary rounded-pill">
+
+                                            <i class="bi bi-eye"></i>
+                                            <span data-i18n="Track">Track</span>
+
+                                        </a>
+
+                                        {% if c.status == 'Open' %}
+
+                                        <form action="{{ url_for('citizen.delete_complaint', complaint_id=c.id) }}"
+                                            method="POST" style="display:inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this complaint?');">
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+
+                                                <i class="bi bi-trash"></i>
+                                                <span data-i18n="Delete">Delete</span>
+
+                                            </button>
+
+                                        </form>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                                {% else %}
+
+                                <tr>
+
+                                    <td colspan="5" class="text-center py-5 text-muted">
+
+                                        <i class="bi bi-inbox display-5"></i>
+
+                                        <br><br>
+
+                                        <span data-i18n="No complaints submitted yet.">No complaints submitted yet.</span>
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= NOTIFICATIONS ================= -->
+
+        <div class="col-lg-4">
+
+            <div class="card notification-card">
+
+                <div class="card-header">
+
+                    <h5 class="fw-bold mb-0">
+
+                        <i class="bi bi-bell-fill text-warning"></i>
+
+                        <span data-i18n="Notifications">Notifications</span>
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="notification-list">
+                        {% for n in notifications %}
+
+                        <div class="notification-item p-3 border-bottom d-flex flex-column transition-all hover-bg-light">
+
+                            <p class="mb-1 d-flex align-items-center fw-medium">
+                                <span class="unread-dot bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></span>
+                                {{ n.message }}
+                            </p>
+
+                            <small class="text-muted ms-3">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ n.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </small>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="p-4 text-center">
+                            <p class="text-muted mb-0" data-i18n="No new notifications.">
+                                No new notifications.
+                            </p>
+                        </div>
+
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

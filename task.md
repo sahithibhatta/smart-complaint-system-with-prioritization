@@ -1,0 +1,8 @@
+- `[x]` Set up project structure and dependencies (requirements.txt, config.py)
+- `[x]` Create Database Models (models/core.py)
+- `[x]` Implement AI Prioritization Engine (ai/priority_engine.py)
+- `[x]` Create Forms (utils/forms.py)
+- `[x]` Implement application routes (routes/*.py)
+- `[x]` Develop frontend templates and static assets (templates/, static/)
+- `[x]` Write and run automated test script (test_app.py)
+- `[x]` Zip final project and provide README

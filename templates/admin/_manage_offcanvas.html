@@ -1,0 +1,275 @@
+<!-- Manage Complaint Offcanvas -->
+<div class="offcanvas offcanvas-end shadow-lg border-0" tabindex="-1" id="manageComplaintDrawer" aria-labelledby="manageComplaintDrawerLabel" style="width: 500px;">
+    <div class="offcanvas-header bg-primary text-white border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="manageComplaintDrawerLabel">
+            <i class="bi bi-file-earmark-text-fill"></i> Complaint <span id="ocComplaintId"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body p-0">
+        <!-- Loader -->
+        <div id="ocLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted fw-semibold">Fetching Details...</p>
+        </div>
+        
+        <!-- Content -->
+        <div id="ocContent" style="display: none;">
+            <div class="p-4">
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" id="ocStatusBadge">Status</span>
+                    <span class="badge fs-6 px-3 py-2 rounded-pill shadow-sm" id="ocPriorityBadge">Priority</span>
+                </div>
+                
+                <h4 class="fw-bold text-primary mb-3" id="ocTitle">Title</h4>
+                
+                <div class="bg-light p-3 rounded-4 mb-3 border">
+                    <div class="fw-bold mb-1"><i class="bi bi-person-fill text-muted"></i> Submitted By</div>
+                    <div id="ocAuthorName" class="fw-semibold">Name</div>
+                    <small class="text-muted" id="ocAuthorEmail">Email</small>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-card-text text-muted"></i> Description</h6>
+                    <div id="ocDescription" class="mb-0 bg-light p-3 rounded-4 border"></div>
+                </div>
+                
+                <div class="mb-4" id="ocAiSection">
+                    <h6 class="fw-bold"><i class="bi bi-cpu text-muted"></i> AI Explanation</h6>
+                    <div class="alert alert-info py-2 shadow-sm rounded-4 border-0" id="ocAiReason"></div>
+                </div>
+                
+                <div class="mb-4" id="ocMapSection" style="display: none;">
+                    <h6 class="fw-bold"><i class="bi bi-geo-alt-fill text-danger"></i> Location</h6>
+                    <p class="mb-2 small text-muted fw-semibold" id="ocAddress"></p>
+                    <div id="ocMap" style="height: 250px; border-radius: 12px; z-index: 1;" class="border shadow-sm"></div>
+                </div>
+                
+                <div class="mb-4" id="ocImageSection" style="display: none;">
+                    <h6 class="fw-bold"><i class="bi bi-image text-muted"></i> Evidence</h6>
+                    <img id="ocImage" src="" class="img-fluid rounded-4 shadow border" alt="Evidence">
+                </div>
+            </div>
+
+            <div class="bg-light border-top p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square text-primary"></i> Update Status</h5>
+                
+                <form id="ocUpdateForm">
+                    <input type="hidden" id="ocFormComplaintId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Department</label>
+                        <select class="form-select shadow-sm" id="ocDepartment" name="department_id"></select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Status</label>
+                        <select class="form-select shadow-sm" id="ocStatus" name="status">
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" id="ocRemarksLabel">Remarks / Action Taken</label>
+                        <textarea class="form-control shadow-sm" id="ocRemarks" name="remarks" rows="3" placeholder="Enter remarks..."></textarea>
+                    </div>
+                    
+                    <div class="mb-4" id="ocPhotoGroup" style="display: none;">
+                        <label class="form-label fw-bold">Resolution Photo</label>
+                        <input type="file" class="form-control shadow-sm" id="ocResolutionImage" name="resolution_image">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill shadow" id="ocSubmitBtn">Save Changes</button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+// Offcanvas Manage Logic
+document.addEventListener("DOMContentLoaded", function() {
+    let ocMapInstance = null;
+    let ocMarkerInstance = null;
+    const offcanvasEl = document.getElementById('manageComplaintDrawer');
+    let bsOffcanvas = null;
+    if (offcanvasEl) {
+        bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+    }
+
+    const manageBtns = document.querySelectorAll('.manage-btn');
+    
+    manageBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const complaintId = this.getAttribute('data-id');
+            
+            // Show offcanvas & loader
+            document.getElementById('ocContent').style.display = 'none';
+            document.getElementById('ocLoading').style.display = 'block';
+            document.getElementById('ocComplaintId').innerText = complaintId;
+            
+            if (bsOffcanvas) bsOffcanvas.show();
+            
+            // Fetch data
+            fetch(`/admin/api/complaint/${complaintId}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Populate basic fields
+                    document.getElementById('ocFormComplaintId').value = data.id;
+                    document.getElementById('ocTitle').innerText = data.title;
+                    document.getElementById('ocDescription').innerText = data.description;
+                    document.getElementById('ocAuthorName').innerText = data.author_username;
+                    document.getElementById('ocAuthorEmail').innerText = data.author_email;
+                    
+                    const statusBadge = document.getElementById('ocStatusBadge');
+                    statusBadge.innerText = data.status;
+                    statusBadge.className = `badge fs-6 px-3 py-2 rounded-pill shadow-sm status-${data.status.replace(' ', '-')}`;
+                    
+                    const prioBadge = document.getElementById('ocPriorityBadge');
+                    prioBadge.innerText = data.priority;
+                    prioBadge.className = `badge fs-6 px-3 py-2 rounded-pill shadow-sm badge-${data.priority.toLowerCase()}`;
+                    if (data.priority === 'Critical') prioBadge.classList.add('bg-danger');
+                    else if (data.priority === 'High') prioBadge.classList.add('bg-warning');
+                    else if (data.priority === 'Medium') prioBadge.classList.add('bg-primary');
+                    else prioBadge.classList.add('bg-success');
+                    
+                    // AI Reason
+                    if(data.priority_reason) {
+                        document.getElementById('ocAiSection').style.display = 'block';
+                        document.getElementById('ocAiReason').innerText = data.priority_reason;
+                    } else {
+                        document.getElementById('ocAiSection').style.display = 'none';
+                    }
+                    
+                    // Evidence Image
+                    if(data.image_path) {
+                        document.getElementById('ocImageSection').style.display = 'block';
+                        document.getElementById('ocImage').src = data.image_path;
+                    } else {
+                        document.getElementById('ocImageSection').style.display = 'none';
+                    }
+                    
+                    // Populate Form Selects
+                    const deptSelect = document.getElementById('ocDepartment');
+                    deptSelect.innerHTML = '';
+                    const noDeptOpt = document.createElement('option');
+                    noDeptOpt.value = "";
+                    noDeptOpt.innerText = "Select Department (Optional)";
+                    deptSelect.appendChild(noDeptOpt);
+                    
+                    data.departments.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.innerText = d.name;
+                        if(data.department_id === d.id) opt.selected = true;
+                        deptSelect.appendChild(opt);
+                    });
+                    
+                    document.getElementById('ocStatus').value = data.status;
+                    document.getElementById('ocRemarks').value = '';
+                    document.getElementById('ocPhotoGroup').style.display = data.status === 'Resolved' ? 'block' : 'none';
+                    
+                    // Map logic
+                    if (data.latitude && data.longitude) {
+                        document.getElementById('ocMapSection').style.display = 'block';
+                        let addressText = [];
+                        if (data.address) addressText.push(data.address);
+                        if (data.landmark) addressText.push("Landmark: " + data.landmark);
+                        document.getElementById('ocAddress').innerText = addressText.join(" | ");
+                        
+                        // Render map
+                        setTimeout(() => {
+                            if (ocMapInstance != null) {
+                                ocMapInstance.remove();
+                            }
+                            ocMapInstance = L.map('ocMap').setView([data.latitude, data.longitude], 16);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; OpenStreetMap contributors'
+                            }).addTo(ocMapInstance);
+                            
+                            ocMarkerInstance = L.marker([data.latitude, data.longitude]).addTo(ocMapInstance);
+                            ocMapInstance.invalidateSize();
+                        }, 400); // Wait for offcanvas slide animation
+                    } else {
+                        document.getElementById('ocMapSection').style.display = 'none';
+                    }
+                    
+                    // Hide loader, show content
+                    document.getElementById('ocLoading').style.display = 'none';
+                    document.getElementById('ocContent').style.display = 'block';
+                })
+                .catch(err => {
+                    console.error("Error fetching complaint:", err);
+                    document.getElementById('ocLoading').innerHTML = `<div class="alert alert-danger mx-3 mt-3">Failed to load data. Please refresh.</div>`;
+                });
+        });
+    });
+    
+    // Status Select Toggle for Resolution Photo
+    const statusSelectEl = document.getElementById('ocStatus');
+    if(statusSelectEl) {
+        statusSelectEl.addEventListener('change', function() {
+            const photoGroup = document.getElementById('ocPhotoGroup');
+            const remarksLabel = document.getElementById('ocRemarksLabel');
+            if (this.value === 'Resolved') {
+                photoGroup.style.display = 'block';
+                remarksLabel.innerText = 'Resolution Remarks (Required)';
+            } else {
+                photoGroup.style.display = 'none';
+                remarksLabel.innerText = 'Remarks / Action Taken';
+            }
+        });
+    }
+    
+    // Form Submission
+    const updateFormEl = document.getElementById('ocUpdateForm');
+    if(updateFormEl) {
+        updateFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('ocSubmitBtn');
+            const originalHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+            submitBtn.disabled = true;
+            
+            const complaintId = document.getElementById('ocFormComplaintId').value;
+            const formData = new FormData(this);
+            
+            fetch(`/admin/api/complaint/${complaintId}/update`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    // Update table UI
+                    const row = document.querySelector(`button[data-id="${complaintId}"]`).closest('tr');
+                    if (row) {
+                        const statusTd = row.querySelector('.status-col, td:nth-child(5), td:nth-child(6)'); // Try to find status cell
+                        if (statusTd) {
+                            statusTd.innerHTML = `<span class="badge status-${data.status.replace(' ', '-')}">${data.status}</span>`;
+                        }
+                    }
+                    
+                    bsOffcanvas.hide();
+                } else {
+                    alert(data.error || "An error occurred.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to update status.");
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalHtml;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+});
+</script>

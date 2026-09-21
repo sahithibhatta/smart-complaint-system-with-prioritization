@@ -1,0 +1,550 @@
+{% extends 'base.html' %}
+
+{% block title %}Smart Complaint System - Home{% endblock %}
+
+
+{% block content %}
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero-section">
+
+    <div class="container">
+
+        <div class="row align-items-center py-5">
+
+
+            <div class="col-lg-7 text-center text-lg-start">
+
+
+                <span class="badge bg-light text-primary px-3 py-2 rounded-pill mb-3">
+
+                    <i class="bi bi-stars"></i>
+                    <span data-i18n="AI Powered Governance">AI Powered Governance</span>
+
+                </span>
+
+
+
+                <h1 class="display-3 fw-bold mb-4 animate-fade-in-up">
+
+                    <span data-i18n="Smart Complaint System">Smart Complaint System</span>
+
+                    <br>
+
+                    <span class="text-info" data-i18n="with AI Prioritization">
+                        with AI Prioritization
+                    </span>
+
+                </h1>
+
+
+
+                <p class="lead mb-5 animate-fade-in-up animate-delay-1">
+
+                    <span data-i18n="Report public issues digitally and let Artificial Intelligence analyze severity, prioritize complaints, and improve faster resolution.">Report public issues digitally and let Artificial Intelligence
+                    analyze severity, prioritize complaints, and improve faster
+                    resolution.</span>
+
+                </p>
+
+
+
+                {% if current_user.is_authenticated %}
+
+                    {% if current_user.role == 'citizen' %}
+
+                    <a href="{{ url_for('citizen.submit_complaint') }}"
+                       class="btn btn-light btn-lg rounded-pill px-5 shadow">
+
+                        <i class="bi bi-send-fill"></i>
+                        <span data-i18n="Report Issue">Report Issue</span>
+
+                    </a>
+
+
+                    {% else %}
+
+                    <a href="{{ url_for('admin.dashboard') }}"
+                       class="btn btn-light btn-lg rounded-pill px-5 shadow">
+
+                        <i class="bi bi-speedometer2"></i>
+                        <span data-i18n="Dashboard">Dashboard</span>
+
+                    </a>
+
+
+                    {% endif %}
+
+
+                {% else %}
+
+
+                <a href="{{ url_for('auth.register') }}"
+                   class="btn btn-light btn-lg rounded-pill px-5 shadow text-primary">
+
+                    <i class="bi bi-person-plus"></i>
+                    <span data-i18n="Get Started">Get Started</span>
+
+                </a>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+
+
+
+            <!-- AI ANALYZER -->
+
+            <div class="col-lg-5 mt-5 mt-lg-0">
+
+
+                <div class="glass-card p-5 text-center">
+
+
+                    <i class="bi bi-robot display-1 text-primary"></i>
+
+
+                    <h3 class="mt-4 fw-bold text-dark" data-i18n="AI Complaint Analyzer">
+
+                        AI Complaint Analyzer
+
+                    </h3>
+
+
+
+                    <p class="text-muted" data-i18n="Automatically detects complaint urgency and assigns priority levels.">
+
+                        Automatically detects complaint urgency
+                        and assigns priority levels.
+
+                    </p>
+
+
+
+
+                    <div class="row g-3 mt-4">
+
+
+                        <div class="col-6">
+
+                            <div class="p-3 rounded shadow-sm bg-danger text-white ai-priority-card">
+
+                                <h5 class="fw-bold" data-i18n="Critical">
+                                    Critical
+                                </h5>
+
+                                <small data-i18n="Immediate action required">
+                                    Immediate action required
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="p-3 rounded shadow-sm bg-warning text-dark ai-priority-card">
+
+                                <h5 class="fw-bold" data-i18n="High">
+                                    High
+                                </h5>
+
+                                <small data-i18n="Urgent attention needed">
+                                    Urgent attention needed
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="p-3 rounded shadow-sm bg-primary text-white ai-priority-card">
+
+                                <h5 class="fw-bold" data-i18n="Medium">
+                                    Medium
+                                </h5>
+
+                                <small data-i18n="Normal processing">
+                                    Normal processing
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="p-3 rounded shadow-sm bg-success text-white ai-priority-card">
+
+                                <h5 class="fw-bold" data-i18n="Low">
+                                    Low
+                                </h5>
+
+                                <small data-i18n="Regular queue">
+                                    Regular queue
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+
+
+<!-- ================= FEATURES ================= -->
+
+
+<section class="py-5 features-section">
+
+
+<div class="container">
+
+
+
+<div class="text-center mb-5">
+
+
+<span class="badge bg-primary rounded-pill px-4 py-2">
+
+<i class="bi bi-stars"></i>
+<span data-i18n="Smart Technology">Smart Technology</span>
+
+</span>
+
+
+
+<h2 class="fw-bold text-primary mt-3" data-i18n="Powerful Features">
+
+Powerful Features
+
+</h2>
+
+
+
+<p class="text-muted" data-i18n="AI-powered complaint management for faster, transparent and efficient governance.">
+
+AI-powered complaint management for faster,
+transparent and efficient governance.
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="row g-4">
+
+
+
+<div class="col-md-4">
+
+
+<div class="feature-box h-100">
+
+
+<div class="feature-icon bg-primary">
+
+<i class="bi bi-robot"></i>
+
+</div>
+
+
+
+<h4 class="fw-bold mt-4" data-i18n="AI Prioritization">
+
+AI Prioritization
+
+</h4>
+
+
+
+<p class="text-muted" data-i18n="AI analyzes complaint descriptions and automatically assigns Critical, High, Medium or Low priority.">
+
+AI analyzes complaint descriptions and
+automatically assigns Critical, High,
+Medium or Low priority.
+
+</p>
+
+
+
+<div class="priority-mini">
+
+<span class="critical" data-i18n="Critical">
+Critical
+</span>
+
+<span class="high" data-i18n="High">
+High
+</span>
+
+<span class="medium" data-i18n="Medium">
+Medium
+</span>
+
+<span class="low" data-i18n="Low">
+Low
+</span>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-md-4">
+
+
+<div class="feature-box h-100">
+
+
+<div class="feature-icon bg-success">
+
+<i class="bi bi-geo-alt"></i>
+
+</div>
+
+
+
+<h4 class="fw-bold mt-4" data-i18n="Real-time Tracking">
+
+Real-time Tracking
+
+</h4>
+
+
+
+<p class="text-muted" data-i18n="Citizens can monitor complaint progress until final resolution.">
+
+Citizens can monitor complaint progress
+until final resolution.
+
+</p>
+
+
+
+<div class="feature-tag">
+
+<i class="bi bi-clock-history"></i>
+<span data-i18n="Live Status Updates">Live Status Updates</span>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-md-4">
+
+
+<div class="feature-box h-100">
+
+
+<div class="feature-icon bg-warning">
+
+<i class="bi bi-bar-chart-line"></i>
+
+</div>
+
+
+
+<h4 class="fw-bold mt-4" data-i18n="Transparency">
+
+Transparency
+
+</h4>
+
+
+
+<p class="text-muted" data-i18n="Improves communication between citizens and authorities.">
+
+Improves communication between citizens
+and authorities.
+
+</p>
+
+
+
+<div class="feature-tag">
+
+<i class="bi bi-shield-check"></i>
+<span data-i18n="Secure Governance">Secure Governance</span>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- ================= STATISTICS ================= -->
+
+
+<section class="stat-section py-5">
+
+
+<div class="container">
+
+
+<div class="row text-center g-4">
+
+
+
+<div class="col-md-4">
+
+
+<div class="dashboard-card">
+
+
+<h1 class="display-4 fw-bold text-primary">
+
+24/7
+
+</h1>
+
+
+<p class="fw-semibold mb-0" data-i18n="AI Monitoring">
+
+AI Monitoring
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-md-4">
+
+
+<div class="dashboard-card">
+
+
+<h1 class="display-4 fw-bold text-success">
+
+99%
+
+</h1>
+
+
+<p class="fw-semibold mb-0" data-i18n="Resolution Rate">
+
+Resolution Rate
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-md-4">
+
+
+<div class="dashboard-card">
+
+
+<h1 class="display-4 fw-bold text-warning">
+
+10K+
+
+</h1>
+
+
+<p class="fw-semibold mb-0" data-i18n="Happy Citizens">
+
+Happy Citizens
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+{% endblock %}

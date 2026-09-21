@@ -1,0 +1,822 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Smart Complaint System{% endblock %}
+
+
+{% block head %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+/* Stat Cards Modernization */
+.stat-card-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; }
+.stat-card-critical { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%) !important; color: white !important; }
+.stat-card-high { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important; color: white !important; }
+.stat-card-resolved { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important; color: white !important; }
+
+.dashboard-card {
+    transition: all 0.3s ease !important;
+}
+.dashboard-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.stat-card-total p, .stat-card-critical p, .stat-card-high p, .stat-card-resolved p { color: rgba(255, 255, 255, 0.9) !important; }
+.stat-card-total h2, .stat-card-critical h2, .stat-card-high h2, .stat-card-resolved h2 { color: white !important; }
+.stat-card-total i, .stat-card-critical i, .stat-card-high i, .stat-card-resolved i { color: rgba(255, 255, 255, 0.9) !important; font-size: 2.2rem; }
+
+/* Button Modernization */
+.btn-export-csv {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-export-pdf {
+    background: linear-gradient(135deg, #f85032 0%, #e73827 100%);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-view-all {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-manage {
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    color: #1a252f;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-export-csv:hover, .btn-export-pdf:hover, .btn-view-all:hover {
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.btn-manage:hover {
+    color: #1a252f;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Containers and Table */
+.modern-container {
+    border-radius: 16px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06) !important;
+    border: none !important;
+}
+
+.table-hover-custom tbody tr { transition: background-color 0.2s ease; }
+.table-hover-custom tbody tr:hover td { background-color: #f8f9fa !important; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+
+<!-- HEADER -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-5">
+
+
+<div>
+
+<span class="badge bg-primary rounded-pill px-3 py-2">
+
+<i class="bi bi-shield-lock"></i>
+Admin Control Panel
+
+</span>
+
+
+<h2 class="fw-bold mt-3">
+
+AI Complaint Analytics Dashboard
+
+</h2>
+
+
+<p class="text-muted">
+
+Monitor complaints, analyze priorities and manage resolutions.
+
+</p>
+
+
+</div>
+
+
+
+<div class="d-flex gap-2 align-items-center">
+
+<select id="dateRangePicker" class="form-select rounded-pill shadow-sm" style="width: auto; border: 2px solid #e9ecef;">
+    <option value="all">All Time</option>
+    <option value="today">Today</option>
+    <option value="7days">Last 7 Days</option>
+    <option value="this_month">This Month</option>
+</select>
+
+<a href="{{ url_for('export.export_csv') }}"
+class="btn btn-export-csv rounded-pill px-4">
+
+
+<i class="bi bi-filetype-csv"></i>
+
+CSV
+
+</a>
+
+
+
+<a href="{{ url_for('export.export_pdf') }}"
+class="btn btn-export-pdf rounded-pill px-4">
+
+
+<i class="bi bi-filetype-pdf"></i>
+
+PDF
+
+</a>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- STATISTICS -->
+
+
+<div class="row g-4 mb-5">
+
+
+
+<div class="col-lg-3 col-md-6">
+
+
+<div class="dashboard-card stat-card-total h-100">
+
+
+<div class="d-flex justify-content-between">
+
+
+<div>
+
+<p class="text-muted mb-1">
+
+Total Complaints
+
+</p>
+
+
+<h2 class="fw-bold" id="stat-total">
+
+{{ total }}
+
+</h2>
+
+
+</div>
+
+
+<i class="bi bi-clipboard-data"></i>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-lg-3 col-md-6">
+
+
+<div class="dashboard-card stat-card-critical h-100">
+
+
+<div class="d-flex justify-content-between">
+
+
+<div>
+
+<p class="text-muted mb-1">
+
+Critical Priority
+
+</p>
+
+
+<h2 class="fw-bold text-danger" id="stat-critical">
+
+{{ critical }}
+
+</h2>
+
+
+</div>
+
+
+<i class="bi bi-exclamation-triangle text-danger"></i>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-lg-3 col-md-6">
+
+
+<div class="dashboard-card stat-card-high h-100">
+
+
+<div class="d-flex justify-content-between">
+
+
+<div>
+
+<p class="text-muted mb-1">
+
+High Priority
+
+</p>
+
+
+<h2 class="fw-bold text-warning" id="stat-high">
+
+{{ high }}
+
+</h2>
+
+
+</div>
+
+
+<i class="bi bi-lightning-charge text-warning"></i>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-lg-3 col-md-6">
+
+
+<div class="dashboard-card stat-card-resolved h-100">
+
+
+<div class="d-flex justify-content-between">
+
+
+<div>
+
+<p class="text-muted mb-1">
+
+Resolved
+
+</p>
+
+
+<h2 class="fw-bold text-success" id="stat-resolved">
+
+{{ resolved_c + closed_c }}
+
+</h2>
+
+
+</div>
+
+
+<i class="bi bi-check-circle text-success"></i>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- CHARTS -->
+
+
+<div class="row g-4 mb-5">
+
+
+<div class="col-lg-6">
+
+
+<div class="card modern-container h-100">
+
+
+<div class="card-header bg-white border-0 p-4">
+
+
+<h5 class="fw-bold mb-0">
+
+<i class="bi bi-pie-chart text-primary"></i>
+
+Priority Analysis
+
+</h5>
+
+
+</div>
+
+
+
+<div class="card-body">
+
+<div style="height:300px">
+
+<canvas id="priorityChart"></canvas>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-lg-6">
+
+
+<div class="card modern-container h-100">
+
+
+<div class="card-header bg-white border-0 p-4">
+
+
+<h5 class="fw-bold mb-0">
+
+<i class="bi bi-bar-chart text-success"></i>
+
+Category Analysis
+
+</h5>
+
+
+</div>
+
+
+
+<div class="card-body">
+
+
+<div style="height:300px">
+
+<canvas id="categoryChart"></canvas>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- RECENT COMPLAINTS -->
+
+
+<div class="card modern-container">
+
+
+<div class="card-header bg-white border-0 p-4 d-flex justify-content-between" style="border-radius: 16px 16px 0 0;">
+
+
+<h5 class="fw-bold mb-0">
+
+
+<i class="bi bi-list-check text-primary"></i>
+
+Recent Complaints
+
+
+</h5>
+
+
+
+<a href="{{ url_for('admin.complaints_list') }}"
+class="btn btn-view-all btn-sm rounded-pill px-4">
+
+
+View All
+
+
+</a>
+
+
+</div>
+
+
+
+
+
+<div class="card-body p-0">
+    <!-- Filter Toolbar -->
+    <div class="p-4 border-bottom" style="background-color: #f8f9fa;">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search ID or Title...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="filterPriority" class="form-select shadow-sm">
+                    <option value="">All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="filterCategory" class="form-select shadow-sm">
+                    <option value="">All Categories</option>
+                    {% for cat in categories.keys() %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="filterStatus" class="form-select shadow-sm">
+                    <option value="">All Statuses</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+<div class="table-responsive">
+
+
+<table class="table table-hover-custom align-middle mb-0" id="complaintsTable">
+
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Title</th>
+
+<th>Category</th>
+
+<th>Priority</th>
+
+<th>Status</th>
+
+<th>Action</th>
+
+
+</tr>
+
+</thead>
+
+
+
+<tbody>
+
+
+{% for c in recent %}
+
+
+<tr>
+
+
+<td class="fw-semibold">
+
+#{{ c.id }}
+
+</td>
+
+
+
+<td>
+
+{{ c.title[:30] }}{% if c.title|length > 30 %}...{% endif %}
+
+</td>
+
+
+
+<td>
+
+{{ c.category }}
+
+</td>
+
+
+
+<td>
+
+
+<span class="badge badge-{{ c.priority }}">
+
+{{ c.priority }}
+
+</span>
+
+
+</td>
+
+
+
+<td>
+
+
+<span class="badge status-{{ c.status.replace(' ','-') }}">
+
+{{ c.status }}
+
+</span>
+
+
+</td>
+
+
+
+<td>
+
+
+<button class="btn btn-sm btn-manage rounded-pill manage-btn" data-id="{{ c.id }}">
+
+
+<i class="bi bi-gear"></i>
+
+Manage
+
+
+</button>
+
+
+</td>
+
+
+</tr>
+
+
+
+{% endfor %}
+
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+{% include 'admin/_manage_offcanvas.html' %}
+
+{% endblock %}
+
+
+
+
+
+{% block scripts %}
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+
+const ctxPriority =
+document.getElementById('priorityChart').getContext('2d');
+
+
+let priorityChart = new Chart(ctxPriority, {
+    type:'doughnut',
+    data:{
+        labels:['Critical','High','Medium','Low'],
+        datasets:[{
+            data:[
+                {{ critical }},
+                {{ high }},
+                {{ medium }},
+                {{ low }}
+            ]
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        onClick: (e, activeElements) => {
+            if (activeElements.length > 0) {
+                const dataIndex = activeElements[0].index;
+                const label = priorityChart.data.labels[dataIndex];
+                const filterPriority = document.getElementById('filterPriority');
+                if (filterPriority) {
+                    filterPriority.value = label;
+                    filterPriority.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    }
+});
+
+const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+
+const catLabels = {{ categories.keys() | list | tojson }};
+const catData = {{ categories.values() | list | tojson }};
+
+let categoryChart = new Chart(ctxCategory,{
+    type:'bar',
+    data:{
+        labels:catLabels,
+        datasets:[{
+            label:'Complaints',
+            data:catData
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{
+            y:{
+                beginAtZero:true
+            }
+        },
+        onClick: (e, activeElements) => {
+            if (activeElements.length > 0) {
+                const dataIndex = activeElements[0].index;
+                const label = categoryChart.data.labels[dataIndex];
+                const filterCategory = document.getElementById('filterCategory');
+                if (filterCategory) {
+                    filterCategory.value = label;
+                    filterCategory.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    }
+});
+
+// Date Range Picker Logic
+document.addEventListener("DOMContentLoaded", function() {
+    const dateRangePicker = document.getElementById('dateRangePicker');
+    if (dateRangePicker) {
+        dateRangePicker.addEventListener('change', function() {
+            const range = this.value;
+            fetch(`/admin/api/stats?range=${range}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Update Stat Cards
+                    document.getElementById('stat-total').innerText = data.total;
+                    document.getElementById('stat-critical').innerText = data.critical;
+                    document.getElementById('stat-high').innerText = data.high;
+                    document.getElementById('stat-resolved').innerText = data.resolved_and_closed;
+
+                    // Update Priority Chart
+                    priorityChart.data.datasets[0].data = [
+                        data.critical, data.high, data.medium, data.low
+                    ];
+                    priorityChart.update();
+
+                    // Update Category Chart
+                    const newCatLabels = Object.keys(data.categories);
+                    const newCatData = Object.values(data.categories);
+                    categoryChart.data.labels = newCatLabels;
+                    categoryChart.data.datasets[0].data = newCatData;
+                    categoryChart.update();
+                })
+                .catch(err => console.error("Error fetching stats:", err));
+        });
+    }
+});
+
+
+
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterPriority = document.getElementById('filterPriority');
+        const filterCategory = document.getElementById('filterCategory');
+        const filterStatus = document.getElementById('filterStatus');
+        const tableRows = document.querySelectorAll('#complaintsTable tbody tr');
+
+        function filterTable() {
+            const query = searchInput.value.toLowerCase().trim();
+            const priority = filterPriority.value.toLowerCase();
+            const category = filterCategory.value.toLowerCase();
+            const status = filterStatus.value.toLowerCase();
+
+            tableRows.forEach(row => {
+                const rowId = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || "";
+                const rowTitle = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || "";
+                const rowCategory = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || "";
+                const rowPriority = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || "";
+                const rowStatus = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || "";
+
+                const matchesSearch = rowId.includes(query) || rowTitle.includes(query);
+                const matchesPriority = priority === "" || rowPriority.includes(priority);
+                const matchesCategory = category === "" || rowCategory.includes(category);
+                const matchesStatus = status === "" || rowStatus.includes(status);
+
+                if (matchesSearch && matchesPriority && matchesCategory && matchesStatus) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        if(searchInput) searchInput.addEventListener('input', filterTable);
+        if(filterPriority) filterPriority.addEventListener('change', filterTable);
+        if(filterCategory) filterCategory.addEventListener('change', filterTable);
+        if(filterStatus) filterStatus.addEventListener('change', filterTable);
+    });
+</script>
+
+
+
+{% endblock %}

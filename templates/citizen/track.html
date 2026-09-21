@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}Track Complaint - Smart Complaint System{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Page Heading -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge bg-primary px-3 py-2 rounded-pill">
+                <i class="bi bi-search"></i> <span data-i18n="Complaint Tracking">Complaint Tracking</span>
+            </span>
+
+            <h2 class="fw-bold mt-3">
+                <span data-i18n="Complaint #">Complaint #</span>{{ complaint.id }}
+            </h2>
+
+            <p class="text-muted" data-i18n="Track the progress of your complaint in real time.">
+                Track the progress of your complaint in real time.
+            </p>
+        </div>
+
+        <span class="badge status-{{ complaint.status.replace(' ', '-') }} fs-6 px-4 py-2" data-i18n="{{ complaint.status }}">
+            {{ complaint.status }}
+        </span>
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- LEFT SIDE -->
+        <div class="col-lg-8">
+
+            <!-- Complaint Details -->
+            <div class="card shadow-lg border-0 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h3 class="fw-bold mb-3">
+                        {{ complaint.title }}
+                    </h3>
+
+                    <div class="row mb-4">
+
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="bi bi-tag-fill text-primary"></i>
+                                <strong><span data-i18n="Category">Category</span>:</strong>
+                                {{ complaint.category }}
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="bi bi-calendar-event text-success"></i>
+                                <strong><span data-i18n="Submitted">Submitted</span>:</strong>
+                                {{ complaint.created_at.strftime('%B %d, %Y') }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- AI Card -->
+
+                    <div class="card border-0 bg-light mb-4">
+
+                        <div class="card-body">
+
+                            <h5 class="fw-bold mb-3">
+
+                                <i class="bi bi-robot text-primary"></i>
+
+                                <span data-i18n="AI Priority Analysis">AI Priority Analysis</span>
+
+                            </h5>
+
+                            <span class="badge badge-{{ complaint.priority }} fs-6 px-3 py-2"
+                                data-i18n="{{ complaint.priority }}">
+
+                                {{ complaint.priority }}
+
+                            </span>
+
+                            <div class="alert alert-primary mt-3 mb-0">
+
+                                {{ complaint.priority_reason }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Description -->
+
+                    <h5 class="fw-bold">
+
+                        <i class="bi bi-card-text text-primary"></i>
+
+                        <span data-i18n="Complaint Description">Complaint Description</span>
+
+                    </h5>
+
+                    <div class="bg-light rounded p-3 mb-4">
+
+                        {{ complaint.description }}
+
+                    </div>
+
+
+                    {% if complaint.image_path %}
+
+                    <h5 class="fw-bold">
+
+                        <i class="bi bi-image text-success"></i>
+
+                        <span data-i18n="Attached Evidence">Attached Evidence</span>
+
+                    </h5>
+
+                    <img src="{{ url_for('static', filename=complaint.image_path) }}"
+                        class="img-fluid rounded shadow border" style="max-height:350px;">
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Resolution Details -->
+            {% if complaint.status == 'Resolved' or complaint.status == 'Closed' %}
+            <div class="card shadow-lg border-0 mb-4 bg-light">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span data-i18n="Resolution Details">Resolution Details</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if complaint.resolution_remarks %}
+                    <h6 class="fw-bold text-info">
+                        <span data-i18n="Resolution Remarks">Resolution Remarks</span>
+                    </h6>
+                    <p class="mb-3">{{ complaint.resolution_remarks }}</p>
+                    {% endif %}
+                    
+                    {% if complaint.resolution_image_path %}
+                    <h6 class="fw-bold text-info">
+                        <span data-i18n="Resolution Photo">Resolution Photo</span>
+                    </h6>
+                    <img src="{{ url_for('static', filename=complaint.resolution_image_path) }}"
+                        class="img-fluid rounded shadow border" style="max-height:300px;">
+                    {% endif %}
+                    
+                    {% if complaint.resolved_at %}
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="bi bi-clock"></i> 
+                        <span data-i18n="Resolved on">Resolved on</span> 
+                        {{ complaint.resolved_at.strftime('%B %d, %Y %I:%M %p') }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Feedback -->
+
+            {% if complaint.status == 'Resolved' or complaint.status == 'Closed' %}
+
+            <div class="card shadow-lg border-0">
+
+                <div class="card-header bg-success text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-chat-heart"></i>
+
+                        <span data-i18n="Citizen Feedback">Citizen Feedback</span>
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if not complaint.feedback %}
+
+                    <form method="POST" action="{{ url_for('citizen.submit_feedback', complaint_id=complaint.id) }}">
+
+                        {{ feedback_form.hidden_tag() }}
+
+                        <div class="mb-3">
+
+                            {{ feedback_form.rating.label(class="form-label fw-bold translate") }}
+
+                            {{ feedback_form.rating(class="form-select") }}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            {{ feedback_form.comments.label(class="form-label fw-bold translate") }}
+
+                            {{ feedback_form.comments(class="form-control", rows="4") }}
+
+                        </div>
+
+                        {{ feedback_form.submit(class="btn btn-success px-4 translate") }}
+
+                    </form>
+
+                    {% else %}
+
+                    <div class="alert alert-success">
+
+                        <h5>
+
+                            <span data-i18n="Rating :">Rating :</span>
+                            {{ complaint.feedback.rating }}/5
+
+                        </h5>
+
+                        <p class="mb-0">
+
+                            {{ complaint.feedback.comments }}
+
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-lg border-0">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        <i class="bi bi-clock-history"></i>
+
+                        <span data-i18n="Progress Timeline">Progress Timeline</span>
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for h in history %}
+
+                    <div class="d-flex mb-4">
+
+                        <div class="me-3">
+
+                            <div class="rounded-circle bg-primary" style="width:14px;height:14px;"></div>
+
+                            {% if not loop.last %}
+                            <div style="width:2px;height:60px;background:#dee2e6;margin-left:6px;"></div>
+                            {% endif %}
+
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-bold text-primary mb-1" data-i18n="{{ h.new_status }}">
+
+                                {{ h.new_status }}
+
+                            </h6>
+
+                            <small class="text-muted">
+
+                                {{ h.changed_at.strftime('%d %b %Y %I:%M %p') }}
+
+                            </small>
+
+                            <p class="mb-0 mt-2 text-muted" data-i18n="{{ h.remarks }}">
+
+                                {{ h.remarks }}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="text-center py-4">
+
+                        <i class="bi bi-clock-history display-5 text-muted"></i>
+
+                        <p class="text-muted mt-3" data-i18n="No tracking history available.">
+
+                            No tracking history available.
+
+                        </p>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Login - Smart Complaint System{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-5 col-md-7">
+
+            <div class="card shadow-lg border-0">
+
+                <!-- Header -->
+                <div class="card-header bg-primary text-white text-center py-4">
+
+                    <i class="bi bi-shield-lock-fill display-5 mb-2"></i>
+
+                    <h2 class="fw-bold mb-1" data-i18n="Welcome Back">
+                        Welcome Back
+                    </h2>
+
+                    <p class="mb-0 opacity-75" data-i18n="Login to Smart Complaint System">
+                        Login to Smart Complaint System
+                    </p>
+
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-5">
+
+                    <form method="POST" action="">
+
+                        {{ form.hidden_tag() }}
+
+                        <!-- Email -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold" data-i18n="Email Address">
+                                <i class="bi bi-envelope-fill text-primary me-2"></i>
+                                Email Address
+                            </label>
+
+                            {{ form.email(class="form-control form-control-lg translate", placeholder="Enter your email") }}
+
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold" data-i18n="Password">
+                                <i class="bi bi-lock-fill text-primary me-2"></i>
+                                Password
+                            </label>
+
+                            {{ form.password(class="form-control form-control-lg translate", placeholder="Enter your password") }}
+
+                            <div class="text-end mt-2">
+                                <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small fw-medium" data-i18n="Forgot Password?">Forgot Password?</a>
+                            </div>
+
+                        </div>
+
+                        <!-- Login Button -->
+                        <div class="d-grid">
+
+                            {{ form.submit(class="btn btn-primary btn-lg fw-bold rounded-pill translate") }}
+
+                        </div>
+
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+
+                        <p class="mb-2 text-muted" data-i18n="Don't have an account?">
+
+                            Don't have an account?
+
+                        </p>
+
+                        <a href="{{ url_for('auth.register') }}"
+                           class="btn btn-outline-primary rounded-pill px-4" data-i18n="Create Account">
+
+                            <i class="bi bi-person-plus-fill"></i>
+
+                            Create Account
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
